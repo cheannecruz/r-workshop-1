@@ -32,6 +32,9 @@ survey%>%
 survey_IT_au<-survey%>%
   filter(country=="Australia" | country=="australia" | country=="Australi")%>%
   filter(industry=="Computing or Tech" & annual_salary>80000)
+
+survey%>%
+  filter(gender!="Man")
 ```
 
 ### Select
@@ -41,8 +44,68 @@ survey_IT_au %>%
   select(how_old_are_you, job_title, annual_salary)%>%
   arrange(desc(annual_salary))
 
+survey %>%
+  distinct(industry)
+
+survey %>%
+  count(gender, industry, sort=TRUE)
+
 survey_IT_au %>%
   select(-industry)
+
+survey_IT_au %>%
+  count(city, annual_salary, sort=TRUE)
+
+survey_IT_au %>%add_count(highest_level_of_education_completed, sort=TRUE)
+
 ```
 
 
+#### `Mutate` vs `transmute`
+
+```{r}
+survey_IT_au<-survey_IT_au %>%
+  mutate(avr_salary=mean(annual_salary))
+
+survey_IT_au_grouped <- survey_IT_au%>%
+  group_by(city)%>%
+  mutate(max_salary=max(annual_salary))
+
+survey_IT_au %>%
+  group_by(city) %>%
+  mutate(max_salary=max(annual_salary)) %>%
+  select(how_old_are_you, job_title, city, annual_salary, avr_salary, max_salary)
+
+survey_IT_au%>%
+  summarise(min_salary=min(annual_salary))
+
+survey_IT_au%>%
+  group_by(gender)%>%
+  summarise(min_salary=min(annual_salary))
+
+survey_IT_au%>%
+  group_by(gender, city)%>%
+  summarise(min_salary=min(annual_salary))%>%
+  arrange(desc(min_salary))
+
+survey_IT_au%>%
+  group_by(gender, city)%>%
+  summarise(min_salary=min(annual_salary),
+            max_salary=max(annual_salary))%>%
+  arrange(desc(min_salary))%>%
+  ungroup()
+
+survey_IT_au%>%
+  mutate(age=parse_number(overall_years_of_professional_experience))
+
+survey_IT_au<-survey_IT_au%>%
+  mutate(age=parse_number(overall_years_of_professional_experience))
+
+survey_IT_au%>%
+  mutate(is_business_analyst= case_when(job_title == "Business Analyst" ~ "TRUE", T ~ "FALSE"))%>%
+  select(job_title, is_business_analyst)
+  
+survey_IT_au %>%
+  mutate(total_salary=annual_salary + strtoi(other_monetary_comp, base=0L)) %>%
+  select(annual_salary, other_monetary_comp, total_salary)
+```
